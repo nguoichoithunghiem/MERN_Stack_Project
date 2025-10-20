@@ -1,4 +1,4 @@
-import Category from '../models/category.js';
+import Category from '../models/Category.js';
 
 // 📌 Lấy tất cả danh mục (có lọc theo tên + pagination)
 export const getCategories = async (req, res) => {

@@ -84,7 +84,7 @@ export const updateProduct = async (req, res) => {
 
         let imageUrl;
         if (req.file) {
-            imageUrl = `http://localhost:5000/uploads/${req.file.filename}`;
+            imageUrl = `https://mern-stack-project-backend-cz2h.onrender.com/uploads/${req.file.filename}`;
         }
 
         const updateData = { name, price, description, countInStock, categoryName, brandName };

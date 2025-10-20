@@ -58,7 +58,7 @@ export const createProduct = async (req, res) => {
 
         let imageUrl = '';
         if (req.file) {
-            imageUrl = `http://localhost:5000/uploads/${req.file.filename}`;
+            imageUrl = `https://mern-stack-project-backend-cz2h.onrender.com/uploads/${req.file.filename}`;
         }
 
         const product = await Product.create({

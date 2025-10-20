@@ -1,4 +1,4 @@
-import Shipping from '../models/shipping.js';
+import Shipping from '../models/Shipping.js';
 
 // 📌 Lấy danh sách tất cả shipping (có lọc + phân trang)
 export const getShippings = async (req, res) => {

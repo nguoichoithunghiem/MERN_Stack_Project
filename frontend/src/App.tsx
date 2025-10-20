@@ -11,51 +11,89 @@ import ShippingList from "./pages/Shippings/ShippingList";
 import PaymentMethodList from "./pages/PaymentMethods/PaymentMethodList";
 import Login from "./pages/Login/Login";
 import RevenueView from "./pages/Revenue/RevenueView";
+import PrivateRoute from "./components/PrivateRoute";
 
 const App: React.FC = () => {
   return (
     <Router>
       <Routes>
+        {/* Public route */}
+        <Route path="/login" element={<Login />} />
+
+        {/* Private routes */}
         <Route
           path="/"
-          element={<MainLayout><ProductList /></MainLayout>}
+          element={
+            <PrivateRoute>
+              <MainLayout><ProductList /></MainLayout>
+            </PrivateRoute>
+          }
         />
         <Route
           path="/products"
-          element={<MainLayout><ProductList /></MainLayout>}
+          element={
+            <PrivateRoute>
+              <MainLayout><ProductList /></MainLayout>
+            </PrivateRoute>
+          }
         />
         <Route
           path="/users"
-          element={<MainLayout><UserList /></MainLayout>}
+          element={
+            <PrivateRoute>
+              <MainLayout><UserList /></MainLayout>
+            </PrivateRoute>
+          }
         />
         <Route
           path="/orders"
-          element={<MainLayout><OrderList /></MainLayout>}
+          element={
+            <PrivateRoute>
+              <MainLayout><OrderList /></MainLayout>
+            </PrivateRoute>
+          }
         />
         <Route
           path="/brands"
-          element={<MainLayout><BrandList /></MainLayout>}
+          element={
+            <PrivateRoute>
+              <MainLayout><BrandList /></MainLayout>
+            </PrivateRoute>
+          }
         />
         <Route
           path="/categories"
-          element={<MainLayout><CategoryList /></MainLayout>}
+          element={
+            <PrivateRoute>
+              <MainLayout><CategoryList /></MainLayout>
+            </PrivateRoute>
+          }
         />
         <Route
           path="/shippings"
-          element={<MainLayout><ShippingList /></MainLayout>}
+          element={
+            <PrivateRoute>
+              <MainLayout><ShippingList /></MainLayout>
+            </PrivateRoute>
+          }
         />
         <Route
           path="/paymentMethods"
-          element={<MainLayout><PaymentMethodList /></MainLayout>}
+          element={
+            <PrivateRoute>
+              <MainLayout><PaymentMethodList /></MainLayout>
+            </PrivateRoute>
+          }
         />
-        <Route path="/login"
-          element={<Login />} />
         <Route
           path="/revenue"
-          element={<MainLayout><RevenueView /></MainLayout>}
+          element={
+            <PrivateRoute>
+              <MainLayout><RevenueView /></MainLayout>
+            </PrivateRoute>
+          }
         />
       </Routes>
-
     </Router>
   );
 };

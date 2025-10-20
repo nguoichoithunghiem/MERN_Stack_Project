@@ -98,7 +98,7 @@ const OrderForm: React.FC<OrderFormProps> = ({ order, users, products, onSuccess
         }
     };
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center">
+        <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-[1000]">
             <form className="bg-white rounded-lg shadow-xl p-6 w-full max-w-lg relative" onSubmit={handleSubmit}>
                 {/* Nút đóng */}
                 <button

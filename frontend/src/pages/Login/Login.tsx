@@ -1,3 +1,4 @@
+// src/pages/Login.tsx
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { loginUser } from '../../api/loginApi';
@@ -11,12 +12,24 @@ const Login: React.FC = () => {
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
+        setError(''); // reset lỗi trước khi đăng nhập
         try {
             const data = await loginUser({ email, password });
             console.log('Đăng nhập thành công', data);
-            navigate('/');
+
+            // Lưu token và thông tin user vào localStorage
+            localStorage.setItem('token', data.token);
+            localStorage.setItem('user', JSON.stringify(data.user));
+
+            // Điều hướng đến trang admin/dashboard
+            navigate('/admin');
         } catch (err: any) {
-            setError(err.response?.data?.message || 'Đăng nhập thất bại');
+            // Hiển thị thông báo lỗi từ backend
+            if (err.response?.data?.message) {
+                setError(err.response.data.message);
+            } else {
+                setError('Đăng nhập thất bại');
+            }
         }
     };
 
@@ -62,10 +75,9 @@ const Login: React.FC = () => {
                     </div>
                 </div>
 
-
                 <button
                     type="submit"
-                    className="w-full bg-blue-600 text-white py-2 rounded-lg font-semibold hover:bg-blue-700 transition  mt-4"
+                    className="w-full bg-blue-600 text-white py-2 rounded-lg font-semibold hover:bg-blue-700 transition mt-4"
                 >
                     Đăng nhập
                 </button>

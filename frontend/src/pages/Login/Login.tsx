@@ -22,7 +22,7 @@ const Login: React.FC = () => {
             localStorage.setItem('user', JSON.stringify(data.user));
 
             // Điều hướng đến trang admin/dashboard
-            navigate('/admin');
+            navigate('/');
         } catch (err: any) {
             // Hiển thị thông báo lỗi từ backend
             if (err.response?.data?.message) {

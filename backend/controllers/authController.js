@@ -7,12 +7,20 @@ export const login = async (req, res) => {
     try {
         const { email, password } = req.body;
 
+        // Tìm user theo email
         const user = await User.findOne({ email });
         if (!user) return res.status(400).json({ message: 'Email hoặc mật khẩu không đúng' });
 
+        // Kiểm tra mật khẩu
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) return res.status(400).json({ message: 'Email hoặc mật khẩu không đúng' });
 
+        // Chỉ cho admin đăng nhập
+        if (user.role !== 'admin') {
+            return res.status(403).json({ message: 'Chỉ admin mới có quyền đăng nhập' });
+        }
+
+        // Tạo token
         const token = jwt.sign(
             { id: user._id, role: user.role },
             process.env.JWT_SECRET,

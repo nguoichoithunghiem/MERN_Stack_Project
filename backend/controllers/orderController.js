@@ -112,7 +112,7 @@ export const updateOrder = async (req, res) => {
         if (order.status !== 'Cancelled' && status === 'Cancelled') {
             for (const item of order.orderItems) {
                 await Product.findByIdAndUpdate(item.product, {
-                    $inc: { countInStock: item.quantity },
+                    $inc: { countInStock: item.qty },
                 });
             }
         }
@@ -142,7 +142,7 @@ export const deleteOrder = async (req, res) => {
         // Hoàn lại tồn kho
         for (const item of order.orderItems) {
             await Product.findByIdAndUpdate(item.product, {
-                $inc: { countInStock: item.quantity },
+                $inc: { countInStock: item.qty },
             });
         }
 

@@ -1,8 +1,9 @@
 import Order from '../models/Order.js';
 import User from '../models/User.js';
+import Product from '../models/Product.js'; // ✅ Dùng để trừ / cộng tồn kho
 import { io } from '../server.js'; // Socket.IO
 
-// 📦 Lấy tất cả đơn hàng (có lọc + phân trang)
+// =================== 📦 LẤY TẤT CẢ ĐƠN HÀNG (CÓ LỌC + PHÂN TRANG) ===================
 export const getOrders = async (req, res) => {
     try {
         const { userName, paymentMethod, status, startDate, endDate, page = 1, limit = 10 } = req.query;
@@ -54,7 +55,7 @@ export const getOrders = async (req, res) => {
     }
 };
 
-// 🛒 Tạo đơn hàng mới
+// =================== 🛒 TẠO ĐƠN HÀNG (TỰ ĐỘNG TRỪ TỒN KHO) ===================
 export const createOrder = async (req, res) => {
     try {
         const { user: userId, orderItems, totalPrice, paymentMethod, status } = req.body;
@@ -62,6 +63,20 @@ export const createOrder = async (req, res) => {
         const user = await User.findById(userId);
         if (!user) return res.status(404).json({ message: 'User không tồn tại' });
 
+        // 🔹 1️⃣ Kiểm tra tồn kho
+        for (const item of orderItems) {
+            const product = await Product.findById(item.product);
+            if (!product) {
+                return res.status(404).json({ message: `Sản phẩm ID ${item.product} không tồn tại` });
+            }
+            if (product.countInStock < item.qty) {
+                return res.status(400).json({
+                    message: `Sản phẩm "${product.name}" không đủ hàng (Còn ${product.countInStock})`,
+                });
+            }
+        }
+
+        // 🔹 2️⃣ Tạo đơn hàng
         const order = await Order.create({
             user: userId,
             userName: user.name,
@@ -71,21 +86,39 @@ export const createOrder = async (req, res) => {
             status,
         });
 
-        io.emit('orderCreated', order);
+        // 🔹 3️⃣ Trừ tồn kho
+        for (const item of orderItems) {
+            await Product.findByIdAndUpdate(item.product, {
+                $inc: { countInStock: -item.qty },
+            });
+        }
 
+        io.emit('orderCreated', order);
         res.status(201).json(order);
     } catch (error) {
-        res.status(500).json({ message: 'Lỗi khi tạo đơn hàng', error });
+        res.status(500).json({ message: 'Lỗi khi tạo đơn hàng', error: error.message });
     }
 };
 
-// ✏️ Cập nhật đơn hàng
+// =================== ✏️ CẬP NHẬT ĐƠN HÀNG ===================
 export const updateOrder = async (req, res) => {
     try {
         const { user: userId, orderItems, totalPrice, paymentMethod, status } = req.body;
 
-        let updateData = { orderItems, totalPrice, paymentMethod, status };
+        const order = await Order.findById(req.params.id);
+        if (!order) return res.status(404).json({ message: 'Order không tồn tại' });
 
+        // 🔹 Nếu trạng thái chuyển từ khác -> "Cancelled" → hoàn lại hàng
+        if (order.status !== 'Cancelled' && status === 'Cancelled') {
+            for (const item of order.orderItems) {
+                await Product.findByIdAndUpdate(item.product, {
+                    $inc: { countInStock: item.quantity },
+                });
+            }
+        }
+
+        // 🔹 Cập nhật user name nếu đổi user
+        let updateData = { orderItems, totalPrice, paymentMethod, status };
         if (userId) {
             const user = await User.findById(userId);
             if (!user) return res.status(404).json({ message: 'User không tồn tại' });
@@ -93,32 +126,38 @@ export const updateOrder = async (req, res) => {
             updateData.userName = user.name;
         }
 
-        const order = await Order.findByIdAndUpdate(req.params.id, updateData, { new: true });
-        if (!order) return res.status(404).json({ message: 'Order không tồn tại' });
-
-        res.json(order);
+        const updatedOrder = await Order.findByIdAndUpdate(req.params.id, updateData, { new: true });
+        res.json(updatedOrder);
     } catch (error) {
-        res.status(500).json({ message: 'Lỗi khi cập nhật đơn hàng', error });
+        res.status(500).json({ message: 'Lỗi khi cập nhật đơn hàng', error: error.message });
     }
 };
 
-// ❌ Xóa đơn hàng
+// =================== ❌ XÓA ĐƠN HÀNG (TỰ HOÀN LẠI TỒN KHO) ===================
 export const deleteOrder = async (req, res) => {
     try {
-        const order = await Order.findByIdAndDelete(req.params.id);
+        const order = await Order.findById(req.params.id);
         if (!order) return res.status(404).json({ message: 'Order không tồn tại' });
 
-        res.json({ message: 'Order đã được xóa' });
+        // Hoàn lại tồn kho
+        for (const item of order.orderItems) {
+            await Product.findByIdAndUpdate(item.product, {
+                $inc: { countInStock: item.quantity },
+            });
+        }
+
+        await order.deleteOne();
+        res.json({ message: 'Order đã được xóa và hoàn lại tồn kho' });
     } catch (error) {
-        res.status(500).json({ message: 'Lỗi khi xóa đơn hàng', error });
+        res.status(500).json({ message: 'Lỗi khi xóa đơn hàng', error: error.message });
     }
 };
 
-// 📊 Thống kê doanh thu tổng
+// =================== 📊 THỐNG KÊ DOANH THU TỔNG ===================
 export const getTotalRevenue = async (req, res) => {
     try {
         const result = await Order.aggregate([
-            { $match: { status: 'Completed' } }, // chỉ tính đơn hoàn thành
+            { $match: { status: 'Completed' } },
             {
                 $group: {
                     _id: null,
@@ -134,12 +173,12 @@ export const getTotalRevenue = async (req, res) => {
     }
 };
 
-// 📊 Thống kê doanh thu theo ngày
+// =================== 📊 THỐNG KÊ DOANH THU THEO NGÀY ===================
 export const getRevenueByDay = async (req, res) => {
     try {
         const { startDate, endDate } = req.query;
-
         const match = { status: 'Completed' };
+
         if (startDate || endDate) {
             match.createdAt = {};
             if (startDate) match.createdAt.$gte = new Date(startDate);
@@ -164,7 +203,7 @@ export const getRevenueByDay = async (req, res) => {
     }
 };
 
-// 📊 Thống kê doanh thu theo tháng
+// =================== 📊 THỐNG KÊ DOANH THU THEO THÁNG ===================
 export const getRevenueByMonth = async (req, res) => {
     try {
         const result = await Order.aggregate([

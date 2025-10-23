@@ -178,7 +178,7 @@ const PaymentMethodList: React.FC = () => {
 
                     <button
                         onClick={handleSearch}
-                        className="flex items-center gap-2 bg-blue-500 text-white px-4 py-2 rounded-lg shadow hover:bg-blue-600 transition"
+                        className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg shadow hover:bg-blue-600 transition"
                     >
                         <Search size={18} />
                         <span>Tìm kiếm</span>

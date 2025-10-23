@@ -155,7 +155,7 @@ const OrderList: React.FC = () => {
             </div>
 
             {/* Bộ lọc + Xuất Excel */}
-            <div className="rounded-xl mb-6 bg-white p-4 shadow flex flex-wrap gap-4 items-end">
+            <div className="rounded-xl mb-6 bg-white p-4 shadow flex flex-wrap gap-4 items-end justify-between">
                 <div className="relative w-full sm:w-44 md:w-48 lg:w-52">
                     <Search className="absolute left-3 top-2.5 text-gray-400" size={18} />
                     <input
@@ -167,43 +167,43 @@ const OrderList: React.FC = () => {
                     />
                 </div>
 
-                <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="border border-gray-300 rounded-lg px-3 py-2 w-40">
-                    <option value="">Tất cả trạng thái</option>
-                    <option value="Processing">Processing</option>
-                    <option value="Booking Successful">Booking Successful</option>
-                </select>
+                <div className='flex space-x-2 '>
+                    <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="border border-gray-300 rounded-lg px-3 py-2 w-40">
+                        <option value="">Tất cả trạng thái</option>
+                        <option value="Processing">Processing</option>
+                        <option value="Booking Successful">Booking Successful</option>
+                    </select>
 
-                <select value={paymentFilter} onChange={(e) => setPaymentFilter(e.target.value)} className="border border-gray-300 rounded-lg px-3 py-2 w-40">
-                    <option value="">Tất cả thanh toán</option>
-                    <option value="Tiền mặt">Tiền mặt</option>
-                    <option value="Chuyển Khoản">Chuyển Khoản</option>
-                </select>
+                    <select value={paymentFilter} onChange={(e) => setPaymentFilter(e.target.value)} className="border border-gray-300 rounded-lg px-3 py-2 w-40">
+                        <option value="">Tất cả thanh toán</option>
+                        <option value="Tiền mặt">Tiền mặt</option>
+                        <option value="Chuyển Khoản">Chuyển Khoản</option>
+                    </select>
 
-                <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} className="border border-gray-300 rounded-lg px-3 py-2 w-36" />
-                <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} className="border border-gray-300 rounded-lg px-3 py-2 w-36" />
+                    <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} className="border border-gray-300 rounded-lg px-3 py-2 w-36" />
+                    <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} className="border border-gray-300 rounded-lg px-3 py-2 w-36" />
 
-                <select
-                    value={limit}
-                    onChange={(e) => {
-                        setLimit(Number(e.target.value));
-                        setPage(1);
-                    }}
-                    className="border border-gray-300 rounded-lg px-3 py-2 w-20"
-                >
-                    {itemsPerPageOptions.map((n) => (
-                        <option key={n} value={n}>{n} Đơn</option>
-                    ))}
-                </select>
+                    <select
+                        value={limit}
+                        onChange={(e) => {
+                            setLimit(Number(e.target.value));
+                            setPage(1);
+                        }}
+                        className="border border-gray-300 rounded-lg px-3 py-2 w-20"
+                    >
+                        {itemsPerPageOptions.map((n) => (
+                            <option key={n} value={n}>{n} Đơn</option>
+                        ))}
+                    </select>
 
-                <button
-                    onClick={handleSearch}
-                    className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg shadow hover:bg-green-700 transition"
-                >
-                    <Search size={18} />
-                    <span>Tìm kiếm</span>
-                </button>
-
-
+                    <button
+                        onClick={handleSearch}
+                        className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg shadow hover:bg-green-700 transition"
+                    >
+                        <Search size={18} />
+                        <span>Tìm kiếm</span>
+                    </button>
+                </div>
             </div>
 
             {/* Form thêm/sửa */}

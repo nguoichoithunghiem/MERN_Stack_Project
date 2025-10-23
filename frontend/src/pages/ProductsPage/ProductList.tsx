@@ -139,68 +139,71 @@ const ProductList: React.FC = () => {
             </div>
 
             {/* Bộ lọc */}
-            <div className="rounded-xl mb-6 bg-white p-4 shadow flex flex-wrap gap-4 items-end">
-                <input
-                    type="text"
-                    placeholder="Tìm kiếm theo tên sản phẩm..."
-                    value={filters.name}
-                    onChange={(e) => setFilters({ ...filters, name: e.target.value })}
-                    className="border border-gray-300 rounded-lg px-3 py-2 w-full sm:w-64"
-                />
-                <select
-                    value={filters.categoryName}
-                    onChange={(e) => setFilters({ ...filters, categoryName: e.target.value })}
-                    className="border border-gray-300 rounded-lg px-3 py-2 w-48"
-                >
-                    <option value="">Tất cả danh mục</option>
-                    {categories.map((c) => (
-                        <option key={c._id} value={c.name}>{c.name}</option>
-                    ))}
-                </select>
-                <select
-                    value={filters.brandName}
-                    onChange={(e) => setFilters({ ...filters, brandName: e.target.value })}
-                    className="border border-gray-300 rounded-lg px-3 py-2 w-40"
-                >
-                    <option value="">Tất cả thương hiệu</option>
-                    {brands.map((b) => (
-                        <option key={b._id} value={b.name}>{b.name}</option>
-                    ))}
-                </select>
-                <select
-                    value={`${filters.minPrice}-${filters.maxPrice}`}
-                    onChange={(e) => {
-                        const [min, max] = e.target.value.split('-');
-                        setFilters({ ...filters, minPrice: min || '', maxPrice: max || '' });
-                    }}
-                    className="border border-gray-300 rounded-lg px-3 py-2 w-40"
-                >
-                    <option value="-">Giá tiền</option>
-                    <option value="-500000">Dưới 500.000đ</option>
-                    <option value="500000-1000000">500.000đ - 1.000.000đ</option>
-                    <option value="1000000-3000000">1.000.000đ - 3.000.000đ</option>
-                    <option value="3000000-5000000">3.000.000đ - 5.000.000đ</option>
-                    <option value="5000000-">Trên 5.000.000đ</option>
-                </select>
-                <select
-                    value={pageSize}
-                    onChange={(e) => { setPageSize(Number(e.target.value)); setCurrentPage(1); }}
-                    className="border border-gray-300 rounded-lg px-3 py-2 "
-                >
-                    <option value={5}>5 Sản phẩm</option>
-                    <option value={10}>10 Sản phẩm</option>
-                    <option value={20}>20 Sản phẩm</option>
-                </select>
+            <div className="rounded-xl mb-6 bg-white p-4 shadow flex flex-wrap gap-4 items-end justify-between">
+                <div>
+                    <input
+                        type="text"
+                        placeholder="Tìm kiếm theo tên sản phẩm..."
+                        value={filters.name}
+                        onChange={(e) => setFilters({ ...filters, name: e.target.value })}
+                        className="border border-gray-300 rounded-lg px-3 py-2 w-full sm:w-64"
+                    />
+                </div>
+                <div className='flex space-x-2'>
+                    <select
+                        value={filters.categoryName}
+                        onChange={(e) => setFilters({ ...filters, categoryName: e.target.value })}
+                        className="border border-gray-300 rounded-lg px-3 py-2 w-48"
+                    >
+                        <option value="">Tất cả danh mục</option>
+                        {categories.map((c) => (
+                            <option key={c._id} value={c.name}>{c.name}</option>
+                        ))}
+                    </select>
+                    <select
+                        value={filters.brandName}
+                        onChange={(e) => setFilters({ ...filters, brandName: e.target.value })}
+                        className="border border-gray-300 rounded-lg px-3 py-2 w-40"
+                    >
+                        <option value="">Tất cả thương hiệu</option>
+                        {brands.map((b) => (
+                            <option key={b._id} value={b.name}>{b.name}</option>
+                        ))}
+                    </select>
+                    <select
+                        value={`${filters.minPrice}-${filters.maxPrice}`}
+                        onChange={(e) => {
+                            const [min, max] = e.target.value.split('-');
+                            setFilters({ ...filters, minPrice: min || '', maxPrice: max || '' });
+                        }}
+                        className="border border-gray-300 rounded-lg px-3 py-2 w-40"
+                    >
+                        <option value="-">Giá tiền</option>
+                        <option value="-500000">Dưới 500.000đ</option>
+                        <option value="500000-1000000">500.000đ - 1.000.000đ</option>
+                        <option value="1000000-3000000">1.000.000đ - 3.000.000đ</option>
+                        <option value="3000000-5000000">3.000.000đ - 5.000.000đ</option>
+                        <option value="5000000-">Trên 5.000.000đ</option>
+                    </select>
+                    <select
+                        value={pageSize}
+                        onChange={(e) => { setPageSize(Number(e.target.value)); setCurrentPage(1); }}
+                        className="border border-gray-300 rounded-lg px-3 py-2 "
+                    >
+                        <option value={5}>5 Sản phẩm</option>
+                        <option value={10}>10 Sản phẩm</option>
+                        <option value={20}>20 Sản phẩm</option>
+                    </select>
 
-                <button
-                    onClick={() => { setCurrentPage(1); fetchProducts(); }}
-                    className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg shadow hover:bg-green-700 transition"
-                >
-                    <Search size={18} /> <span>Tìm kiếm</span>
-                </button>
-
-
+                    <button
+                        onClick={() => { setCurrentPage(1); fetchProducts(); }}
+                        className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg shadow hover:bg-green-700 transition"
+                    >
+                        <Search size={18} /> <span>Tìm kiếm</span>
+                    </button>
+                </div>
             </div>
+
 
             {/* Form thêm/sửa */}
             {(showForm || editingProduct) && (

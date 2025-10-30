@@ -43,6 +43,7 @@ const ShippingList: React.FC = () => {
     }, []);
 
     // 🗑️ Xóa giao hàng
+    // 🗑️ Xóa giao hàng
     const handleDelete = async (id: string) => {
         const result = await Swal.fire({
             title: 'Bạn có chắc chắn muốn xóa mục này không?',
@@ -52,19 +53,31 @@ const ShippingList: React.FC = () => {
             confirmButtonColor: '#3085d6',
             cancelButtonColor: '#d33',
             confirmButtonText: 'Có, xóa!',
-            cancelButtonText: 'Hủy'
+            cancelButtonText: 'Hủy',
+            buttonsStyling: false, // tắt style mặc định
+            customClass: {
+                confirmButton: 'bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded mr-2',
+                cancelButton: 'bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded ml-2'
+            }
         });
 
         if (result.isConfirmed) {
-            await deleteShipping(id);
-            fetchData(searchTerm, page, limit);
-            Swal.fire(
-                'Đã xóa!',
-                'Mục đã được xóa thành công.',
-                'success'
-            );
+            await deleteShipping(id); // gọi API xóa giao hàng
+            fetchData(searchTerm, page, limit); // load lại dữ liệu
+
+            Swal.fire({
+                title: 'Đã xóa!',
+                text: 'Mục đã được xóa thành công.',
+                icon: 'success',
+                buttonsStyling: false, // tắt style mặc định
+                customClass: {
+                    confirmButton: 'bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded'
+                }
+            });
         }
     };
+
+
 
     // 🔍 Tìm kiếm
     const handleSearch = () => fetchData(searchTerm, 1, limit);

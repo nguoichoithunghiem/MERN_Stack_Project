@@ -44,6 +44,7 @@ const PaymentMethodList: React.FC = () => {
     }, []);
 
     // ❌ Xóa phương thức
+    // 🗑️ Xóa phương thức thanh toán
     const handleDelete = async (id: string) => {
         const result = await Swal.fire({
             title: 'Bạn có chắc muốn xóa phương thức thanh toán này không?',
@@ -53,17 +54,27 @@ const PaymentMethodList: React.FC = () => {
             confirmButtonColor: '#3085d6',
             cancelButtonColor: '#d33',
             confirmButtonText: 'Có, xóa!',
-            cancelButtonText: 'Hủy'
+            cancelButtonText: 'Hủy',
+            buttonsStyling: false, // tắt style mặc định
+            customClass: {
+                confirmButton: 'bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded mr-2',
+                cancelButton: 'bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded ml-2'
+            }
         });
 
         if (result.isConfirmed) {
-            await deletePaymentMethod(id);
-            fetchData(searchTerm, page);
-            Swal.fire(
-                'Đã xóa!',
-                'Phương thức thanh toán đã được xóa thành công.',
-                'success'
-            );
+            await deletePaymentMethod(id); // gọi API xóa
+            fetchData(searchTerm, page); // load lại dữ liệu
+
+            Swal.fire({
+                title: 'Đã xóa!',
+                text: 'Phương thức thanh toán đã được xóa thành công.',
+                icon: 'success',
+                buttonsStyling: false, // tắt style mặc định
+                customClass: {
+                    confirmButton: 'bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded'
+                }
+            });
         }
     };
 
@@ -178,7 +189,7 @@ const PaymentMethodList: React.FC = () => {
 
                     <button
                         onClick={handleSearch}
-                        className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg shadow hover:bg-blue-600 transition"
+                        className="flex items-center gap-2 bg-blue-500 text-white px-4 py-2 rounded-lg shadow hover:bg-blue-600 transition"
                     >
                         <Search size={18} />
                         <span>Tìm kiếm</span>

@@ -37,7 +37,6 @@ const RevenueView: React.FC = () => {
 
             // Doanh thu theo tháng
             const monthlyData = await getRevenueByMonth();
-            // Chuẩn bị 12 tháng cố định
             const currentYear = new Date().getFullYear();
             const allMonths = Array.from({ length: 12 }, (_, i) => {
                 const monthNum = i + 1;
@@ -54,7 +53,18 @@ const RevenueView: React.FC = () => {
     };
 
     useEffect(() => {
-        fetchData();
+        // Tự động filter từ đầu tháng tới ngày hiện tại
+        const pad = (n: number) => n.toString().padStart(2, '0');
+        const now = new Date();
+        const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+        const start = `${firstDayOfMonth.getFullYear()}-${pad(firstDayOfMonth.getMonth() + 1)}-${pad(firstDayOfMonth.getDate())}`;
+        const end = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+
+        setStartDate(start);
+        setEndDate(end);
+
+        fetchData(start, end);
     }, []);
 
     const handleFilter = () => {

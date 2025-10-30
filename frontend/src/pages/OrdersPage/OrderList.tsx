@@ -44,24 +44,42 @@ const OrderList: React.FC = () => {
         }
     };
 
+    // 🌟 Khi có đơn hàng mới, load lại danh sách
     useEffect(() => {
         if (newOrdersCount > 0) {
             fetchOrders(); // lấy lại danh sách đơn hàng
         }
     }, [newOrdersCount]);
 
+    // 🌟 Khi page hoặc limit thay đổi
     useEffect(() => {
-        fetchOrders();
+        handleSearch();
     }, [page, limit]);
 
-    // 🔎 Nút tìm kiếm
-    const handleSearch = async () => {
+    // 🌟 Khi load trang lần đầu: lọc từ đầu tháng đến hiện tại
+    useEffect(() => {
+        const pad = (n: number) => n.toString().padStart(2, '0');
+        const now = new Date();
+        const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+        const start = `${firstDayOfMonth.getFullYear()}-${pad(firstDayOfMonth.getMonth() + 1)}-${pad(firstDayOfMonth.getDate())}`;
+        const end = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+
+        setStartDate(start);
+        setEndDate(end);
+
+        handleSearch(start, end);
+    }, []);
+
+    // 🔎 Nút tìm kiếm (có thể truyền start/end tùy ý)
+    const handleSearch = async (start?: string, end?: string) => {
         const filters: any = {};
         if (searchTerm.trim()) filters.userName = searchTerm.trim();
         if (statusFilter) filters.status = statusFilter;
         if (paymentFilter) filters.paymentMethod = paymentFilter;
-        if (startDate) filters.startDate = startDate;
-        if (endDate) filters.endDate = endDate;
+        filters.startDate = start || startDate;
+        filters.endDate = end || endDate;
+
         setPage(1);
         await fetchOrders(filters);
     };
@@ -76,17 +94,26 @@ const OrderList: React.FC = () => {
             confirmButtonColor: '#3085d6',
             cancelButtonColor: '#d33',
             confirmButtonText: 'Có, xóa!',
-            cancelButtonText: 'Hủy'
+            cancelButtonText: 'Hủy',
+            buttonsStyling: false,
+            customClass: {
+                confirmButton: 'bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded mr-2',
+                cancelButton: 'bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded ml-2'
+            }
         });
 
         if (result.isConfirmed) {
             await deleteOrder(id);
             fetchOrders();
-            Swal.fire(
-                'Đã xóa!',
-                'Đơn hàng đã được xóa thành công.',
-                'success'
-            );
+            Swal.fire({
+                title: 'Đã xóa!',
+                text: 'Đơn hàng đã được xóa thành công.',
+                icon: 'success',
+                buttonsStyling: false,
+                customClass: {
+                    confirmButton: 'bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded'
+                }
+            });
         }
     };
 
@@ -154,7 +181,7 @@ const OrderList: React.FC = () => {
                 </div>
             </div>
 
-            {/* Bộ lọc + Xuất Excel */}
+            {/* Bộ lọc */}
             <div className="rounded-xl mb-6 bg-white p-4 shadow flex flex-wrap gap-4 items-end justify-between">
                 <div className="relative w-full sm:w-44 md:w-48 lg:w-52">
                     <Search className="absolute left-3 top-2.5 text-gray-400" size={18} />
@@ -197,7 +224,7 @@ const OrderList: React.FC = () => {
                     </select>
 
                     <button
-                        onClick={handleSearch}
+                        onClick={() => handleSearch()}
                         className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg shadow hover:bg-green-700 transition"
                     >
                         <Search size={18} />
@@ -231,10 +258,8 @@ const OrderList: React.FC = () => {
 
             {/* Bảng danh sách đơn hàng */}
             <div className="relative overflow-x-auto bg-white rounded-xl shadow-md border border-gray-200">
-                {/* Loading overlay */}
                 {loading && (
                     <div className="absolute inset-0 bg-white/70 flex flex-col items-center justify-center z-10">
-                        {/* Spinner tròn xanh */}
                         <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
                         <p className="mt-4 text-blue-500 font-medium">Đang tải dữ liệu...</p>
                     </div>
@@ -261,87 +286,42 @@ const OrderList: React.FC = () => {
                                 >
                                     <td className="px-6 py-3 font-medium text-gray-900">{o._id}</td>
                                     <td className="px-6 py-3">{o.userName}</td>
-                                    <td className="px-6 py-3 font-semibold text-gray-800">
-                                        {o.totalPrice?.toLocaleString()} đ
-                                    </td>
+                                    <td className="px-6 py-3 font-semibold text-gray-800">{o.totalPrice?.toLocaleString()} đ</td>
                                     <td className="px-6 py-3">{o.paymentMethod}</td>
                                     <td className="px-6 py-3">
-                                        <span
-                                            className={`px-3 py-1 rounded-full text-xs font-semibold ${o.status === 'Booking Successful'
-                                                    ? 'bg-green-100 text-green-700'
-                                                    : 'bg-yellow-100 text-yellow-700'
-                                                }`}
-                                        >
+                                        <span className={`px-3 py-1 rounded-full text-xs font-semibold ${o.status === 'Booking Successful' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
                                             {o.status}
                                         </span>
                                     </td>
-                                    <td className="px-6 py-3">
-                                        {o.createdAt ? new Date(o.createdAt).toLocaleDateString('vi-VN') : '—'}
-                                    </td>
+                                    <td className="px-6 py-3">{o.createdAt ? new Date(o.createdAt).toLocaleDateString('vi-VN') : '—'}</td>
                                     <td className="px-6 py-3 flex justify-center gap-3">
-                                        <button
-                                            onClick={() => setSelectedOrder(o)}
-                                            title="Xem chi tiết"
-                                            className="p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition shadow"
-                                        >
-                                            <Eye size={16} />
-                                        </button>
-                                        <button
-                                            onClick={() => handleOpenForm(o)}
-                                            title="Chỉnh sửa"
-                                            className="p-2 bg-yellow-400 text-white rounded-lg hover:bg-yellow-500 transition shadow"
-                                        >
-                                            <Edit size={16} />
-                                        </button>
-                                        <button
-                                            onClick={() => handleDelete(o._id)}
-                                            title="Xóa"
-                                            className="p-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition shadow"
-                                        >
-                                            <Trash2 size={16} />
-                                        </button>
+                                        <button onClick={() => setSelectedOrder(o)} title="Xem chi tiết" className="p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition shadow"><Eye size={16} /></button>
+                                        <button onClick={() => handleOpenForm(o)} title="Chỉnh sửa" className="p-2 bg-yellow-400 text-white rounded-lg hover:bg-yellow-500 transition shadow"><Edit size={16} /></button>
+                                        <button onClick={() => handleDelete(o._id)} title="Xóa" className="p-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition shadow"><Trash2 size={16} /></button>
                                     </td>
                                 </tr>
                             ))
                         ) : (
                             <tr>
-                                <td colSpan={7} className="text-center py-6 text-gray-500 italic">
-                                    Không có đơn hàng nào.
-                                </td>
+                                <td colSpan={7} className="text-center py-6 text-gray-500 italic">Không có đơn hàng nào.</td>
                             </tr>
                         )}
                     </tbody>
                 </table>
             </div>
 
-
             {/* Phân trang */}
             <div className="flex justify-between items-center mt-6 bg-white p-4 rounded-xl shadow-md">
                 <div className="text-gray-700 text-sm">
-                    Hiển thị <span className="font-semibold text-blue-600">{orders.length}</span> mục — Trang{' '}
-                    <span className="font-semibold text-blue-600">{page}</span> / {totalPages}
+                    Hiển thị <span className="font-semibold text-blue-600">{orders.length}</span> mục — Trang <span className="font-semibold text-blue-600">{page}</span> / {totalPages}
                 </div>
 
                 <div className="flex items-center gap-3">
-                    <button
-                        onClick={() => setPage(prev => Math.max(prev - 1, 1))}
-                        disabled={page === 1}
-                        className="flex items-center justify-center w-9 h-9 rounded-full border border-gray-300 bg-white 
-                       hover:bg-gray-100 disabled:opacity-50 transition"
-                    >
+                    <button onClick={() => setPage(prev => Math.max(prev - 1, 1))} disabled={page === 1} className="flex items-center justify-center w-9 h-9 rounded-full border border-gray-300 bg-white hover:bg-gray-100 disabled:opacity-50 transition">
                         <ChevronLeft size={18} />
                     </button>
-
-                    <span className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg shadow-sm">
-                        Trang <span className="font-semibold text-blue-600">{page}</span> / {totalPages}
-                    </span>
-
-                    <button
-                        onClick={() => setPage(prev => Math.min(prev + 1, totalPages))}
-                        disabled={page === totalPages}
-                        className="flex items-center justify-center w-9 h-9 rounded-full border border-gray-300 bg-white 
-                       hover:bg-gray-100 disabled:opacity-50 transition"
-                    >
+                    <span className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg shadow-sm">Trang <span className="font-semibold text-blue-600">{page}</span> / {totalPages}</span>
+                    <button onClick={() => setPage(prev => Math.min(prev + 1, totalPages))} disabled={page === totalPages} className="flex items-center justify-center w-9 h-9 rounded-full border border-gray-300 bg-white hover:bg-gray-100 disabled:opacity-50 transition">
                         <ChevronRight size={18} />
                     </button>
                 </div>

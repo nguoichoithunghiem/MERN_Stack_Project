@@ -50,25 +50,23 @@ const PaymentMethodForm: React.FC<PaymentMethodFormProps> = ({
         try {
             if (paymentMethodId) {
                 await updatePaymentMethod(paymentMethodId, formData);
-                await Swal.fire({
-                    icon: 'success',
-                    title: 'Cập nhật thành công',
-                    text: 'Phương thức thanh toán đã được cập nhật.',
-                    timer: 1500,
-                    showConfirmButton: false
-                });
             } else {
                 await createPaymentMethod(formData);
-                await Swal.fire({
-                    icon: 'success',
-                    title: 'Tạo thành công',
-                    text: 'Phương thức thanh toán mới đã được tạo.',
-                    timer: 1500,
-                    showConfirmButton: false
-                });
             }
-            onSuccess();
-            onClose();
+
+            onSuccess(); // reload dữ liệu
+            onClose();   // đóng modal trước
+
+            // 🔹 Hiển thị thông báo sau khi modal đã đóng
+            await Swal.fire({
+                icon: 'success',
+                title: paymentMethodId ? 'Cập nhật thành công' : 'Tạo thành công',
+                text: paymentMethodId
+                    ? 'Phương thức thanh toán đã được cập nhật.'
+                    : 'Phương thức thanh toán mới đã được tạo.',
+                timer: 1500,
+                showConfirmButton: false
+            });
         } catch (err) {
             console.error(err);
             await Swal.fire({
@@ -79,10 +77,11 @@ const PaymentMethodForm: React.FC<PaymentMethodFormProps> = ({
         }
     };
 
+
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-[1000]">
+        <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-[9999]">
             <div className="bg-white p-6 rounded-lg shadow-lg w-96">
                 <h2 className="text-lg font-bold mb-4">
                     {paymentMethodId ? "Cập nhật phương thức thanh toán" : "Thêm phương thức thanh toán"}

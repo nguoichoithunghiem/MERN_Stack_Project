@@ -77,19 +77,30 @@ const ProductList: React.FC = () => {
             confirmButtonColor: '#3085d6',
             cancelButtonColor: '#d33',
             confirmButtonText: 'Có, xóa!',
-            cancelButtonText: 'Hủy'
+            cancelButtonText: 'Hủy',
+            buttonsStyling: false, // tắt style mặc định
+            customClass: {
+                confirmButton: 'bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded mr-2',
+                cancelButton: 'bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded ml-2'
+            }
         });
 
         if (result.isConfirmed) {
             await deleteProduct(id);
             fetchProducts();
-            Swal.fire(
-                'Đã xóa!',
-                'Sản phẩm đã được xóa thành công.',
-                'success'
-            );
+
+            Swal.fire({
+                title: 'Đã xóa!',
+                text: 'Sản phẩm đã được xóa thành công.',
+                icon: 'success',
+                buttonsStyling: false, // tắt style mặc định
+                customClass: {
+                    confirmButton: 'bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded'
+                }
+            });
         }
     };
+
 
     // 📤 Xuất Excel
     const handleExportExcel = () => {
@@ -202,8 +213,9 @@ const ProductList: React.FC = () => {
                         <Search size={18} /> <span>Tìm kiếm</span>
                     </button>
                 </div>
-            </div>
 
+
+            </div>
 
             {/* Form thêm/sửa */}
             {(showForm || editingProduct) && (
@@ -287,7 +299,7 @@ const ProductList: React.FC = () => {
 
 
             {/* Pagination */}
-            {totalPages > 1 && (
+            {totalPages > 0 && (
                 <div className="flex justify-between items-center mt-6 bg-white p-4 rounded-xl shadow-md">
                     <div className="text-gray-700 text-sm">
                         Hiển thị <span className="font-semibold text-blue-600">{products.length}</span> sản phẩm —

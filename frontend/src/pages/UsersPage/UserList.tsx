@@ -62,19 +62,30 @@ const UserList: React.FC = () => {
             confirmButtonColor: '#3085d6',
             cancelButtonColor: '#d33',
             confirmButtonText: 'Có, xóa!',
-            cancelButtonText: 'Hủy'
+            cancelButtonText: 'Hủy',
+            buttonsStyling: false, // tắt style mặc định
+            customClass: {
+                confirmButton: 'bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded mr-2',
+                cancelButton: 'bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded ml-2'
+            }
         });
 
         if (result.isConfirmed) {
-            await deleteUser(id);
-            fetchUsers();
-            Swal.fire(
-                'Đã xóa!',
-                'User đã được xóa thành công.',
-                'success'
-            );
+            await deleteUser(id); // gọi API xóa user
+            fetchUsers(); // load lại danh sách user
+
+            Swal.fire({
+                title: 'Đã xóa!',
+                text: 'User đã được xóa thành công.',
+                icon: 'success',
+                buttonsStyling: false, // tắt style mặc định
+                customClass: {
+                    confirmButton: 'bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded'
+                }
+            });
         }
     };
+
 
     // 📤 Xuất Excel
     const handleExportExcel = () => {

@@ -20,11 +20,11 @@ const ShippingForm: React.FC<ShippingFormProps> = ({ isOpen, onClose, onSuccess,
         country: "",
         shippingStatus: "Pending",
     });
-
-    const [orders, setOrders] = useState<Order[]>([]); // ✅ Lưu danh sách đơn hàng
+    const [orders, setOrders] = useState<Order[]>([]);
     const [loadingOrders, setLoadingOrders] = useState<boolean>(true);
+    const [error, setError] = useState<string>(""); // state hiển thị lỗi
 
-    // ✅ Lấy danh sách đơn hàng
+    // Lấy danh sách đơn hàng
     useEffect(() => {
         const fetchOrders = async () => {
             try {
@@ -39,7 +39,7 @@ const ShippingForm: React.FC<ShippingFormProps> = ({ isOpen, onClose, onSuccess,
         fetchOrders();
     }, []);
 
-    // ✅ Lấy dữ liệu khi sửa
+    // Lấy dữ liệu khi sửa
     useEffect(() => {
         if (shippingId) {
             getShippingById(shippingId).then((data) => {
@@ -62,39 +62,61 @@ const ShippingForm: React.FC<ShippingFormProps> = ({ isOpen, onClose, onSuccess,
                 shippingStatus: "Pending",
             });
         }
+        setError("");
     }, [shippingId]);
 
-    // ✅ Thay đổi input
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
         setFormData((prev) => ({ ...prev, [name]: value }));
+        setError(""); // reset lỗi khi user nhập
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        // 🔹 Validate tất cả các trường bắt buộc
+        if (!formData.order) {
+            setError("Vui lòng chọn đơn hàng!");
+            return;
+        }
+        if (!formData.address || !formData.address.trim()) {
+            setError("Vui lòng nhập địa chỉ!");
+            return;
+        }
+        if (!formData.city || !formData.city.trim()) {
+            setError("Vui lòng nhập thành phố!");
+            return;
+        }
+        if (!formData.postalCode || !formData.postalCode.trim()) {
+            setError("Vui lòng nhập mã bưu điện!");
+            return;
+        }
+        if (!formData.country || !formData.country.trim()) {
+            setError("Vui lòng nhập quốc gia!");
+            return;
+        }
+
         try {
             if (shippingId) {
                 await updateShipping(shippingId, formData);
-                await Swal.fire({
-                    icon: 'success',
-                    title: 'Cập nhật thành công',
-                    text: 'Thông tin shipping đã được cập nhật.',
-                    timer: 1500,
-                    showConfirmButton: false
-                });
             } else {
                 await createShipping(formData);
-                await Swal.fire({
-                    icon: 'success',
-                    title: 'Tạo thành công',
-                    text: 'Thông tin shipping mới đã được tạo.',
-                    timer: 1500,
-                    showConfirmButton: false
-                });
             }
 
-            onSuccess();
-            onClose();
+            onSuccess(); // gọi callback load lại dữ liệu
+            onClose();   // đóng modal trước
+
+            // 🔹 Hiển thị thông báo sau khi modal đã đóng
+            await Swal.fire({
+                icon: 'success',
+                title: shippingId ? 'Cập nhật thành công' : 'Tạo thành công',
+                text: shippingId
+                    ? 'Thông tin shipping đã được cập nhật.'
+                    : 'Thông tin shipping mới đã được tạo.',
+                timer: 1500,
+                showConfirmButton: false,
+            });
+
         } catch (err) {
             console.error(err);
             await Swal.fire({
@@ -108,21 +130,22 @@ const ShippingForm: React.FC<ShippingFormProps> = ({ isOpen, onClose, onSuccess,
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-[1000]">
+        <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-[9999]">
             <div className="bg-white p-6 rounded-lg shadow-lg w-96">
                 <h2 className="text-lg font-bold mb-4">
                     {shippingId ? "Cập nhật giao hàng" : "Thêm giao hàng"}
                 </h2>
 
+                {/* Hiển thị lỗi */}
+                {error && <p className="text-red-500 mb-2">{error}</p>}
+
                 <form onSubmit={handleSubmit} className="space-y-3">
-                    {/* ✅ Dropdown chọn đơn hàng */}
                     <label className="block font-medium text-gray-700">Mã đơn hàng</label>
                     <select
                         name="order"
                         value={typeof formData.order === "string" ? formData.order : formData.order?._id || ""}
                         onChange={handleChange}
                         className="border w-full px-3 py-2 rounded"
-                        required
                     >
                         <option value="">{loadingOrders ? "Đang tải..." : "-- Chọn đơn hàng --"}</option>
                         {orders.map((order) => (
@@ -138,7 +161,6 @@ const ShippingForm: React.FC<ShippingFormProps> = ({ isOpen, onClose, onSuccess,
                         value={formData.address || ""}
                         onChange={handleChange}
                         className="border w-full px-3 py-2 rounded"
-                        required
                     />
                     <input
                         name="city"
@@ -146,7 +168,6 @@ const ShippingForm: React.FC<ShippingFormProps> = ({ isOpen, onClose, onSuccess,
                         value={formData.city || ""}
                         onChange={handleChange}
                         className="border w-full px-3 py-2 rounded"
-                        required
                     />
                     <input
                         name="postalCode"

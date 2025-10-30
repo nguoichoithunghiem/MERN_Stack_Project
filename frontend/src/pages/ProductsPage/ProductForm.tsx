@@ -23,6 +23,8 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, onSuccess, onClose }
     const [categories, setCategories] = useState<{ name: string }[]>([]);
     const [brands, setBrands] = useState<{ name: string }[]>([]);
 
+    const [error, setError] = useState<string>(''); // state để hiển thị lỗi
+
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -41,6 +43,34 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, onSuccess, onClose }
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        setError('');
+
+        // 🔹 Validate tất cả các trường bắt buộc
+        if (!name.trim()) {
+            setError('Vui lòng nhập tên sản phẩm!');
+            return;
+        }
+        if (!categoryName) {
+            setError('Vui lòng chọn danh mục!');
+            return;
+        }
+        if (!brandName) {
+            setError('Vui lòng chọn thương hiệu!');
+            return;
+        }
+        if (price <= 0) {
+            setError('Vui lòng nhập giá hợp lệ (> 0)!');
+            return;
+        }
+        if (countInStock < 0) {
+            setError('Số lượng tồn phải >= 0!');
+            return;
+        }
+        if (!description.trim()) {
+            setError('Vui lòng nhập mô tả sản phẩm!');
+            return;
+        }
+
         try {
             const formData = new FormData();
             formData.append('name', name);
@@ -117,6 +147,9 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, onSuccess, onClose }
                     {product ? 'Sửa' : 'Thêm'} sản phẩm
                 </h2>
 
+                {/* Hiển thị lỗi */}
+                {error && <p className="text-red-500 mb-4">{error}</p>}
+
                 {/* Grid chia 2 cột */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {/* Cột trái */}
@@ -127,8 +160,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, onSuccess, onClose }
                                 type="text"
                                 className="border p-2 w-full rounded focus:ring-2 focus:ring-blue-400"
                                 value={name}
-                                onChange={(e) => setName(e.target.value)}
-                                required
+                                onChange={(e) => { setName(e.target.value); setError(''); }}
                             />
                         </div>
 
@@ -137,8 +169,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, onSuccess, onClose }
                             <select
                                 className="border p-2 w-full rounded focus:ring-2 focus:ring-blue-400"
                                 value={categoryName}
-                                onChange={(e) => setCategoryName(e.target.value)}
-                                required
+                                onChange={(e) => { setCategoryName(e.target.value); setError(''); }}
                             >
                                 <option value="">-- Chọn danh mục --</option>
                                 {categories.map((cat) => (
@@ -154,8 +185,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, onSuccess, onClose }
                             <select
                                 className="border p-2 w-full rounded focus:ring-2 focus:ring-blue-400"
                                 value={brandName}
-                                onChange={(e) => setBrandName(e.target.value)}
-                                required
+                                onChange={(e) => { setBrandName(e.target.value); setError(''); }}
                             >
                                 <option value="">-- Chọn thương hiệu --</option>
                                 {brands.map((b) => (
@@ -172,8 +202,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, onSuccess, onClose }
                                 type="number"
                                 className="border p-2 w-full rounded focus:ring-2 focus:ring-blue-400"
                                 value={price}
-                                onChange={(e) => setPrice(Number(e.target.value))}
-                                required
+                                onChange={(e) => { setPrice(Number(e.target.value)); setError(''); }}
                             />
                         </div>
                     </div>
@@ -185,7 +214,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, onSuccess, onClose }
                             <textarea
                                 className="border p-2 w-full h-24 rounded focus:ring-2 focus:ring-blue-400 resize-none"
                                 value={description}
-                                onChange={(e) => setDescription(e.target.value)}
+                                onChange={(e) => { setDescription(e.target.value); setError(''); }}
                             />
                         </div>
 
@@ -195,7 +224,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ product, onSuccess, onClose }
                                 type="number"
                                 className="border p-2 w-full rounded focus:ring-2 focus:ring-blue-400"
                                 value={countInStock}
-                                onChange={(e) => setCountInStock(Number(e.target.value))}
+                                onChange={(e) => { setCountInStock(Number(e.target.value)); setError(''); }}
                             />
                         </div>
 

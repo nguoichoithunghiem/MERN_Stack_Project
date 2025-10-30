@@ -45,6 +45,7 @@ const BrandList: React.FC = () => {
         fetchBrands(searchTerm, page, limit);
     }, []);
 
+    // 🗑️ Xóa thương hiệu
     const handleDelete = async (id: string) => {
         const result = await Swal.fire({
             title: 'Bạn có chắc muốn xóa thương hiệu này?',
@@ -54,19 +55,30 @@ const BrandList: React.FC = () => {
             confirmButtonColor: '#3085d6',
             cancelButtonColor: '#d33',
             confirmButtonText: 'Có, xóa!',
-            cancelButtonText: 'Hủy'
+            cancelButtonText: 'Hủy',
+            buttonsStyling: false, // tắt style mặc định
+            customClass: {
+                confirmButton: 'bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded mr-2',
+                cancelButton: 'bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded ml-2'
+            }
         });
 
         if (result.isConfirmed) {
-            await deleteBrand(id);
-            fetchBrands(searchTerm, page, limit);
-            Swal.fire(
-                'Đã xóa!',
-                'Thương hiệu đã được xóa thành công.',
-                'success'
-            );
+            await deleteBrand(id); // gọi API xóa
+            fetchBrands(searchTerm, page, limit); // load lại danh sách thương hiệu
+
+            Swal.fire({
+                title: 'Đã xóa!',
+                text: 'Thương hiệu đã được xóa thành công.',
+                icon: 'success',
+                buttonsStyling: false, // tắt style mặc định
+                customClass: {
+                    confirmButton: 'bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded'
+                }
+            });
         }
     };
+
 
     const handleSearch = async () => {
         fetchBrands(searchTerm, 1, limit); // reset page về 1 khi tìm kiếm
